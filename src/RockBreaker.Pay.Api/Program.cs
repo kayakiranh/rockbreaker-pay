@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using RockBreaker.Pay.Infrastructure.Auditing;
 using RockBreaker.Pay.Infrastructure.Persistence;
+using RockBreaker.Pay.Infrastructure.Health;
 using RockBreaker.Pay.Modules.Cutoff;
 using RockBreaker.Pay.Modules.Campaigns;
 using RockBreaker.Pay.Modules.Banking;
@@ -62,6 +63,7 @@ builder.Services
 builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
+builder.Services.AddScoped<IReadinessService, ReadinessService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher, Pbkdf2PasswordHasher>();
@@ -93,6 +95,13 @@ builder.Services.AddHttpClient<IElasticAuditWriter, ElasticAuditWriter>(client =
 {
     client.BaseAddress = new Uri(
         builder.Configuration["Elasticsearch:BaseUrl"] ?? "http://localhost:9200/");
+});
+
+builder.Services.AddHttpClient("ElasticsearchHealth", client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["Elasticsearch:BaseUrl"] ?? "http://localhost:9200/");
+    client.Timeout = TimeSpan.FromSeconds(2);
 });
 
 builder.Services.AddHttpClient<IGovernmentSoapClient, GovernmentSoapClient>(client =>
@@ -137,6 +146,5 @@ app.UseOpenApi(settings =>
 });
 
 app.MapControllers();
-app.MapGet("/health/live", () => Results.Ok(new { status = "Healthy" }));
 
 app.Run();
