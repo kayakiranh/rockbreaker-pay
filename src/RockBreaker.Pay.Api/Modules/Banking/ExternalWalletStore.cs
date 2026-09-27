@@ -78,8 +78,8 @@ public sealed class ExternalWalletStore : IExternalWalletStore
         await connection.ExecuteAsync(txSql, new
         {
             Id = reversalId,
-            SourceWalletId = creditWallet ? null : walletId,
-            DestinationWalletId = creditWallet ? walletId : null,
+            SourceWalletId = creditWallet ? (Guid?)null : walletId,
+            DestinationWalletId = creditWallet ? walletId : (Guid?)null,
             Amount = amount,
             Status = (int)TransactionStatus.Reversed,
             IdempotencyKey = $"reversal:{originalTransactionId}",
@@ -165,8 +165,8 @@ public sealed class ExternalWalletStore : IExternalWalletStore
         await connection.ExecuteAsync(txSql, new
         {
             Id = transactionId,
-            SourceWalletId = creditWallet ? null : walletId,
-            DestinationWalletId = creditWallet ? walletId : null,
+            SourceWalletId = creditWallet ? (Guid?)null : walletId,
+            DestinationWalletId = creditWallet ? walletId : (Guid?)null,
             Amount = amount,
             Type = type,
             Status = (int)TransactionStatus.Completed,

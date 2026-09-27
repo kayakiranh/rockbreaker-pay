@@ -80,7 +80,7 @@ public sealed class PaymentInstructionProcessor : IPaymentInstructionProcessor
                 {
                     row.Id,
                     Status = (int)status,
-                    NextRunAtUtc = status == PaymentInstructionStatus.Completed ? null : nextRun,
+                    NextRunAtUtc = status == PaymentInstructionStatus.Completed ? (DateTime?)null : nextRun,
                     LastError = result.IsSuccess ? null : result.ErrorMessage
                 },
                 cancellationToken: cancellationToken));
