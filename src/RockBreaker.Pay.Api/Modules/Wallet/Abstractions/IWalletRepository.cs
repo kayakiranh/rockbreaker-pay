@@ -11,42 +11,31 @@ namespace RockBreaker.Pay.Modules.Wallet.Abstractions;
 /// </summary>
 public interface IWalletRepository
 {
-    /// <summary>
-    /// TR: Wallet'ı kimliğine göre getirir.
-    /// EN: Gets a wallet by identifier.
-    /// Architecture: Repository Query.
-    /// </summary>
-    /// <param name="walletId">TR: Wallet kimliği. EN: Wallet identifier.</param>
-    /// <returns>TR: Wallet veya null. EN: Wallet or null.</returns>
+    /// <summary>TR: Wallet'ı kimliğine göre getirir. EN: Gets a wallet by identifier. Architecture: Repository Query.</summary>
     Task<WalletEntity?> GetByIdAsync(Guid walletId);
+
+    /// <summary>TR: Kullanıcının wallet'ını getirir. EN: Gets a user's wallet. Architecture: Repository Query.</summary>
+    Task<WalletEntity?> GetByUserIdAsync(Guid userId);
+
+    /// <summary>TR: Yeni wallet ekler. EN: Inserts a new wallet. Architecture: Repository Command.</summary>
+    Task InsertAsync(WalletEntity wallet);
 
     /// <summary>
     /// TR: Bakiye değişikliği sırasında wallet satırını update lock ile getirir.
     /// EN: Gets the wallet using an update lock during a balance-changing operation.
     /// Architecture: Pessimistic Locking against double-spend races.
     /// </summary>
-    /// <param name="walletId">TR: Wallet kimliği. EN: Wallet identifier.</param>
-    /// <param name="connection">TR: Açık bağlantı. EN: Open connection.</param>
-    /// <param name="transaction">TR: Aktif SQL transaction. EN: Active SQL transaction.</param>
-    /// <returns>TR: Wallet veya null. EN: Wallet or null.</returns>
     Task<WalletEntity?> GetForUpdateAsync(Guid walletId, IDbConnection connection, IDbTransaction transaction);
 
-    /// <summary>
-    /// TR: Wallet finansal durumunu transaction içinde günceller.
-    /// EN: Updates wallet financial state inside the transaction.
-    /// Architecture: Repository Command + Unit of Work boundary owned by caller.
-    /// </summary>
-    /// <param name="wallet">TR: Wallet. EN: Wallet.</param>
-    /// <param name="connection">TR: Açık bağlantı. EN: Open connection.</param>
-    /// <param name="transaction">TR: Aktif transaction. EN: Active transaction.</param>
+    /// <summary>TR: Wallet finansal durumunu transaction içinde günceller. EN: Updates wallet financial state inside the transaction. Architecture: Repository Command.</summary>
     Task UpdateAsync(WalletEntity wallet, IDbConnection connection, IDbTransaction transaction);
 
-    /// <summary>
-    /// TR: Wallet durumunu günceller; fraud sonrası block için kullanılır.
-    /// EN: Updates wallet status; used to block after fraud.
-    /// Architecture: Repository Command.
-    /// </summary>
-    /// <param name="walletId">TR: Wallet kimliği. EN: Wallet identifier.</param>
-    /// <param name="status">TR: Yeni durum. EN: New status.</param>
+    /// <summary>TR: Wallet durumunu günceller. EN: Updates wallet status. Architecture: Repository Command.</summary>
     Task UpdateStatusAsync(Guid walletId, WalletStatus status);
+
+    /// <summary>TR: Kullanıcı limitlerini günceller. EN: Updates user limits. Architecture: Repository Command.</summary>
+    Task UpdateLimitsAsync(WalletEntity wallet);
+
+    /// <summary>TR: Wallet'a ait finansal işlemleri döndürür. EN: Returns financial transactions for a wallet. Architecture: Repository Query.</summary>
+    Task<IReadOnlyCollection<WalletTransaction>> GetTransactionsAsync(Guid walletId);
 }
