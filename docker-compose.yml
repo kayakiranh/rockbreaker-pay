@@ -1,0 +1,27 @@
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: rockbreaker-mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Your_password123}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - rockbreaker-mssql-data:/var/opt/mssql
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    container_name: rockbreaker-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - rockbreaker-elasticsearch-data:/usr/share/elasticsearch/data
+
+volumes:
+  rockbreaker-mssql-data:
+  rockbreaker-elasticsearch-data:
