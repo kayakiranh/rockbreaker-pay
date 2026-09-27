@@ -71,7 +71,7 @@ public sealed class OutboxNotificationProcessor : IOutboxNotificationProcessor
             FROM dbo.OutboxMessages WITH (READPAST)
             WHERE ProcessedAtUtc IS NULL
               AND RetryCount < 10
-              AND Type IN ('WalletTransferCompleted')
+              AND Type IN ('WalletTransferCompleted', 'BillPaymentCompleted')
             ORDER BY CreatedAtUtc;
             """;
 
@@ -89,33 +89,70 @@ public sealed class OutboxNotificationProcessor : IOutboxNotificationProcessor
     /// <param name="cancellationToken">TR: İptal token'ı. EN: Cancellation token.</param>
     private async Task ProcessMessageAsync(OutboxRow message, CancellationToken cancellationToken)
     {
-        var payload = JsonSerializer.Deserialize<WalletTransferPayload>(message.Payload)
-            ?? throw new InvalidOperationException("Outbox payload cannot be deserialized.");
-
-        var recipients = await GetRecipientsAsync(
-            payload.SourceWalletId,
-            payload.DestinationWalletId,
-            cancellationToken);
-
-        foreach (var recipient in recipients)
+        if (string.Equals(message.Type, "WalletTransferCompleted", StringComparison.Ordinal))
         {
-            var direction = recipient.WalletId == payload.SourceWalletId ? "gönderildi" : "alındı";
-            var text = $"{payload.Amount:0.00} {payload.Currency} wallet transferi {direction}. İşlem: {payload.TransactionId}";
+            var payload = JsonSerializer.Deserialize<WalletTransferPayload>(message.Payload)
+                ?? throw new InvalidOperationException("Wallet-transfer outbox payload cannot be deserialized.");
 
-            if (recipient.EmailEnabled && !string.IsNullOrWhiteSpace(recipient.Email))
+            var recipients = await GetRecipientsAsync(
+                payload.SourceWalletId,
+                payload.DestinationWalletId,
+                cancellationToken);
+
+            foreach (var recipient in recipients)
             {
-                await EnsureSentAsync("EMAIL", recipient.Email, text);
+                var direction = recipient.WalletId == payload.SourceWalletId ? "gönderildi" : "alındı";
+                var text = $"{payload.Amount:0.00} {payload.Currency} wallet transferi {direction}. İşlem: {payload.TransactionId}";
+                await SendToRecipientAsync(recipient, text);
             }
 
-            if (recipient.SmsEnabled && !string.IsNullOrWhiteSpace(recipient.Phone))
+            return;
+        }
+
+        if (string.Equals(message.Type, "BillPaymentCompleted", StringComparison.Ordinal))
+        {
+            var payload = JsonSerializer.Deserialize<BillPaymentPayload>(message.Payload)
+                ?? throw new InvalidOperationException("Bill-payment outbox payload cannot be deserialized.");
+
+            var recipients = await GetRecipientsAsync(
+                payload.WalletId,
+                payload.WalletId,
+                cancellationToken);
+
+            foreach (var recipient in recipients)
             {
-                await EnsureSentAsync("SMS", recipient.Phone, text);
+                var text = $"{payload.Amount:0.00} {payload.Currency} fatura ödemesi tamamlandı. Fatura: {payload.BillId}, İşlem: {payload.TransactionId}";
+                await SendToRecipientAsync(recipient, text);
             }
 
-            if (recipient.PushEnabled)
-            {
-                await EnsureSentAsync("PUSH", recipient.UserId.ToString(), text);
-            }
+            return;
+        }
+
+        throw new InvalidOperationException($"Unsupported outbox message type: {message.Type}");
+    }
+
+    /// <summary>
+    /// TR: Kullanıcının tercih ettiği aktif kanallara notification gönderir.
+    /// EN: Sends a notification through the user's enabled preferred channels.
+    /// Architecture: Notification Preference Policy + External Adapter.
+    /// </summary>
+    /// <param name="recipient">TR: Bildirim alıcısı. EN: Notification recipient.</param>
+    /// <param name="text">TR: Bildirim metni. EN: Notification text.</param>
+    private async Task SendToRecipientAsync(RecipientRow recipient, string text)
+    {
+        if (recipient.EmailEnabled && !string.IsNullOrWhiteSpace(recipient.Email))
+        {
+            await EnsureSentAsync("EMAIL", recipient.Email, text);
+        }
+
+        if (recipient.SmsEnabled && !string.IsNullOrWhiteSpace(recipient.Phone))
+        {
+            await EnsureSentAsync("SMS", recipient.Phone, text);
+        }
+
+        if (recipient.PushEnabled)
+        {
+            await EnsureSentAsync("PUSH", recipient.UserId.ToString(), text);
         }
     }
 
@@ -231,6 +268,29 @@ public sealed class OutboxNotificationProcessor : IOutboxNotificationProcessor
 
         /// <summary>TR: Retry sayısı. EN: Retry count. Architecture: Persistence Property.</summary>
         public int RetryCount { get; init; }
+    }
+
+    /// <summary>
+    /// TR: Wallet transfer event payload modelidir.
+    /// EN: Wallet transfer event payload model.
+    /// Architecture: Event DTO.
+    /// </summary>
+    private sealed class BillPaymentPayload
+    {
+        /// <summary>TR: İşlem kimliği. EN: Transaction identifier. Architecture: Event Property.</summary>
+        public Guid TransactionId { get; init; }
+
+        /// <summary>TR: Ödeme yapan wallet kimliği. EN: Paying wallet identifier. Architecture: Event Property.</summary>
+        public Guid WalletId { get; init; }
+
+        /// <summary>TR: Fatura kimliği. EN: Bill identifier. Architecture: Event Property.</summary>
+        public Guid BillId { get; init; }
+
+        /// <summary>TR: Ödenen tutar. EN: Paid amount. Architecture: Event Property.</summary>
+        public decimal Amount { get; init; }
+
+        /// <summary>TR: Para birimi. EN: Currency. Architecture: Event Property.</summary>
+        public string Currency { get; init; } = "TRY";
     }
 
     /// <summary>

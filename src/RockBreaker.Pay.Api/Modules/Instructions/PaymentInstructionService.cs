@@ -1,7 +1,9 @@
 using Dapper;
 using RockBreaker.Pay.Common;
 using RockBreaker.Pay.Infrastructure.Persistence;
+using RockBreaker.Pay.Modules.Compliance;
 using RockBreaker.Pay.Modules.Wallet.Abstractions;
+using RockBreaker.Pay.Modules.Wallet.Domain;
 
 namespace RockBreaker.Pay.Modules.Instructions;
 
@@ -14,6 +16,7 @@ public sealed class PaymentInstructionService : IPaymentInstructionService
 {
     private readonly IDbConnectionFactory _connectionFactory;
     private readonly IWalletRepository _walletRepository;
+    private readonly IKycGuard _kycGuard;
 
     /// <summary>
     /// TR: Servis bağımlılıklarını alır.
@@ -22,10 +25,12 @@ public sealed class PaymentInstructionService : IPaymentInstructionService
     /// </summary>
     public PaymentInstructionService(
         IDbConnectionFactory connectionFactory,
-        IWalletRepository walletRepository)
+        IWalletRepository walletRepository,
+        IKycGuard kycGuard)
     {
         _connectionFactory = connectionFactory;
         _walletRepository = walletRepository;
+        _kycGuard = kycGuard;
     }
 
     /// <inheritdoc />
@@ -55,6 +60,27 @@ public sealed class PaymentInstructionService : IPaymentInstructionService
             return OperationResult<PaymentInstructionResponse>.Fail(
                 "WALLET_NOT_FOUND",
                 "Source or destination wallet was not found.");
+        }
+
+        if (!await _kycGuard.IsUserVerifiedAsync(userId))
+        {
+            return OperationResult<PaymentInstructionResponse>.Fail(
+                "KYC_REQUIRED",
+                "Verified KYC is required to create an automatic payment instruction.");
+        }
+
+        if (!await _kycGuard.IsWalletOwnerVerifiedAsync(destination.Id))
+        {
+            return OperationResult<PaymentInstructionResponse>.Fail(
+                "DESTINATION_KYC_REQUIRED",
+                "Destination wallet owner must have Verified KYC status.");
+        }
+
+        if (source.Status != WalletStatus.Active || destination.Status != WalletStatus.Active)
+        {
+            return OperationResult<PaymentInstructionResponse>.Fail(
+                "WALLET_NOT_ACTIVE",
+                "Source and destination wallets must be active.");
         }
 
         if (source.Id == destination.Id)

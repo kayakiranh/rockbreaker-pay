@@ -112,6 +112,7 @@ public sealed class BillPaymentService : IBillPaymentService
 
         if (await _governmentClient.PayBillAsync(bill.Id))
         {
+            await _paymentStore.MarkNotificationReadyAsync(debit.Data!.TransactionId);
             return debit;
         }
 

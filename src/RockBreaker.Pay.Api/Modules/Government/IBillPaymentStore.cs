@@ -32,4 +32,11 @@ public interface IBillPaymentStore
         Guid billId,
         decimal amount,
         string correlationId);
+
+    /// <summary>
+    /// TR: Government SOAP ödemesi onaylandıktan sonra bekleyen outbox event'ini notification worker için hazırlar.
+    /// EN: Makes the pending outbox event ready for the notification worker after the government SOAP payment is confirmed.
+    /// Architecture: Saga Finalization + Transactional Outbox State Transition.
+    /// </summary>
+    Task MarkNotificationReadyAsync(Guid transactionId);
 }

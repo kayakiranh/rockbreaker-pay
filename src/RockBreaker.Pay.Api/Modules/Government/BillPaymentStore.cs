@@ -1,4 +1,5 @@
 using System.Data;
+using System.Text.Json;
 using Dapper;
 using RockBreaker.Pay.Common;
 using RockBreaker.Pay.Infrastructure.Persistence;
@@ -132,6 +133,27 @@ public sealed class BillPaymentStore : IBillPaymentStore
             CreatedAtUtc = now
         }, transaction);
 
+        const string outboxSql = """
+            INSERT INTO dbo.OutboxMessages
+                (Id, Type, Payload, CreatedAtUtc, RetryCount)
+            VALUES
+                (@Id, 'BillPaymentPending', @Payload, @CreatedAtUtc, 0);
+            """;
+
+        await connection.ExecuteAsync(outboxSql, new
+        {
+            Id = transactionId,
+            Payload = JsonSerializer.Serialize(new
+            {
+                TransactionId = transactionId,
+                WalletId = walletId,
+                BillId = billId,
+                Amount = amount,
+                Currency = "TRY"
+            }),
+            CreatedAtUtc = now
+        }, transaction);
+
         transaction.Commit();
 
         return OperationResult<BillPaymentResponse>.Success(new BillPaymentResponse
@@ -205,6 +227,34 @@ public sealed class BillPaymentStore : IBillPaymentStore
             CreatedAtUtc = now
         }, transaction);
 
+        const string cancelOutboxSql = """
+            UPDATE dbo.OutboxMessages
+            SET Type = 'BillPaymentReversed',
+                LastError = 'Government payment failed; wallet debit was compensated.'
+            WHERE Id = @OriginalTransactionId
+              AND Type = 'BillPaymentPending';
+            """;
+
+        await connection.ExecuteAsync(
+            cancelOutboxSql,
+            new { OriginalTransactionId = originalTransactionId },
+            transaction);
+
         transaction.Commit();
+    }
+
+    /// <inheritdoc />
+    public async Task MarkNotificationReadyAsync(Guid transactionId)
+    {
+        const string sql = """
+            UPDATE dbo.OutboxMessages
+            SET Type = 'BillPaymentCompleted',
+                LastError = NULL
+            WHERE Id = @TransactionId
+              AND Type = 'BillPaymentPending';
+            """;
+
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.ExecuteAsync(sql, new { TransactionId = transactionId });
     }
 }

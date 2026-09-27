@@ -97,6 +97,13 @@ public sealed class WalletTransferService : IWalletTransferService
                 "Source wallet owner must have Verified KYC status.");
         }
 
+        if (!await _kycGuard.IsWalletOwnerVerifiedAsync(request.DestinationWalletId))
+        {
+            return OperationResult<TransferResponse>.Fail(
+                "DESTINATION_KYC_REQUIRED",
+                "Destination wallet owner must have Verified KYC status.");
+        }
+
         var fraud = await _fraudEvaluator.EvaluateAsync(request.SourceWalletId, request.Amount);
 
         if (fraud.Action == FraudAction.BlockWallet)
