@@ -28,9 +28,9 @@ public static partial class SensitiveDataMasker
             $"{match.Value[..4]}********{match.Value[^4..]}");
     }
 
-    [GeneratedRegex("(\"(?:password|accessToken|refreshToken|otp|token)\"\s*:\s*\")(.*?)(\")", RegexOptions.IgnoreCase)]
+    [GeneratedRegex("""("(?:password|accessToken|refreshToken|otp|token)"\s*:\s*")(.*?)(")""", RegexOptions.IgnoreCase)]
     private static partial Regex SensitiveJsonFieldRegex();
 
-    [GeneratedRegex("(?<!\d)\d{16}(?!\d)")]
+    [GeneratedRegex("""(?<!\d)\d{16}(?!\d)""")]
     private static partial Regex SixteenDigitRegex();
 }
