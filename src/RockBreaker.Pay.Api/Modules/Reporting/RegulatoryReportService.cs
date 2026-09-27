@@ -213,6 +213,6 @@ public sealed class RegulatoryReportService : IRegulatoryReportService
     private static string EscapeCsv(object? value)
     {
         var text = Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty;
-        return $""{text.Replace(""", """")}"";
+        return "\"" + text.Replace("\"", "\"\"") + "\"";
     }
 }
