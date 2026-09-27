@@ -8,6 +8,7 @@ using RockBreaker.Pay.Modules.Cutoff;
 using RockBreaker.Pay.Modules.Campaigns;
 using RockBreaker.Pay.Modules.Banking;
 using RockBreaker.Pay.Modules.Fraud;
+using RockBreaker.Pay.Modules.Government;
 using RockBreaker.Pay.Modules.Identity.Abstractions;
 using RockBreaker.Pay.Modules.Identity.Application;
 using RockBreaker.Pay.Modules.Identity.Infrastructure;
@@ -80,6 +81,8 @@ builder.Services.AddHostedService<OutboxNotificationWorker>();
 builder.Services.AddScoped<IFraudEvaluator, DatabaseFraudEvaluator>();
 builder.Services.AddScoped<IValidator<TransferRequest>, TransferRequestValidator>();
 builder.Services.AddScoped<IAuditLogWriter, AuditLogWriter>();
+builder.Services.AddScoped<IBillPaymentStore, BillPaymentStore>();
+builder.Services.AddScoped<IBillPaymentService, BillPaymentService>();
 builder.Services.AddScoped<IExternalWalletStore, ExternalWalletStore>();
 builder.Services.AddScoped<IBankTransferService, BankTransferService>();
 
@@ -87,6 +90,12 @@ builder.Services.AddHttpClient<IElasticAuditWriter, ElasticAuditWriter>(client =
 {
     client.BaseAddress = new Uri(
         builder.Configuration["Elasticsearch:BaseUrl"] ?? "http://localhost:9200/");
+});
+
+builder.Services.AddHttpClient<IGovernmentSoapClient, GovernmentSoapClient>(client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["ExternalServices:GovernmentBaseUrl"] ?? "http://localhost:5105/");
 });
 
 builder.Services.AddHttpClient<INotificationClient, NotificationClient>(client =>
