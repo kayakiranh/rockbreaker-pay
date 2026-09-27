@@ -14,5 +14,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\RockBreaker.Pay.Api\RockBreaker.Pay.Api.csproj" />
+    <ProjectReference Include="..\..\src\RockBreaker.FakeKyc.Api\RockBreaker.FakeKyc.Api.csproj" />
   </ItemGroup>
 </Project>
