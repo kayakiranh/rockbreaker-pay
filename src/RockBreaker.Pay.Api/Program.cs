@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using RockBreaker.Pay.Infrastructure.Auditing;
 using RockBreaker.Pay.Infrastructure.Persistence;
 using RockBreaker.Pay.Modules.Cutoff;
+using RockBreaker.Pay.Modules.Campaigns;
 using RockBreaker.Pay.Modules.Banking;
 using RockBreaker.Pay.Modules.Fraud;
 using RockBreaker.Pay.Modules.Identity.Abstractions;
@@ -83,6 +84,12 @@ builder.Services.AddHttpClient<IElasticAuditWriter, ElasticAuditWriter>(client =
 {
     client.BaseAddress = new Uri(
         builder.Configuration["Elasticsearch:BaseUrl"] ?? "http://localhost:9200/");
+});
+
+builder.Services.AddHttpClient<ICampaignClient, CampaignClient>(client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["ExternalServices:CampaignBaseUrl"] ?? "http://localhost:5102/");
 });
 
 builder.Services.AddHttpClient<IBankingClient, BankingClient>(client =>
