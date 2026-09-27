@@ -40,4 +40,7 @@ public sealed class PaymentInstructionResponse
     public DateTime? NextRunAtUtc { get; init; }
     /// <summary>TR: Son hata. EN: Last error. Architecture: DTO Property.</summary>
     public string? LastError { get; init; }
+
+    /// <summary>TR: Ardışık başarısız çalıştırma sayısı. EN: Consecutive failed execution count. Architecture: Retry Metadata.</summary>
+    public int FailureCount { get; init; }
 }

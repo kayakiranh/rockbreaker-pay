@@ -15,8 +15,10 @@ public enum PaymentInstructionStatus
     Cancelled = 3,
     /// <summary>TR: Tek seferlik talimat tamamlandı. EN: One-time instruction completed. Architecture: State Model.</summary>
     Completed = 4,
-    /// <summary>TR: Son çalıştırma başarısız oldu. EN: Last execution failed. Architecture: State Model.</summary>
-    Failed = 5
+    /// <summary>TR: Retry limiti aşıldı ve manuel müdahale gerekiyor. EN: Retry limit was exceeded and manual intervention is required. Architecture: Terminal Failure State.</summary>
+    Failed = 5,
+    /// <summary>TR: Worker talimatı atomik olarak claim etti ve işliyor. EN: Worker atomically claimed the instruction and is processing it. Architecture: Distributed Work Claim State.</summary>
+    Processing = 6
 }
 
 /// <summary>
