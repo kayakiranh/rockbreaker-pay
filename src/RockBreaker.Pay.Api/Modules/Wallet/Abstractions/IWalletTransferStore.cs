@@ -1,3 +1,4 @@
+using RockBreaker.Pay.Common;
 using RockBreaker.Pay.Modules.Wallet.Contracts;
 
 namespace RockBreaker.Pay.Modules.Wallet.Abstractions;

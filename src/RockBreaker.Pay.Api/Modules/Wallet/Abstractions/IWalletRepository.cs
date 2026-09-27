@@ -1,5 +1,6 @@
 using System.Data;
 using RockBreaker.Pay.Modules.Wallet.Domain;
+using WalletEntity = RockBreaker.Pay.Modules.Wallet.Domain.Wallet;
 
 namespace RockBreaker.Pay.Modules.Wallet.Abstractions;
 
@@ -17,7 +18,7 @@ public interface IWalletRepository
     /// </summary>
     /// <param name="walletId">TR: Wallet kimliği. EN: Wallet identifier.</param>
     /// <returns>TR: Wallet veya null. EN: Wallet or null.</returns>
-    Task<Wallet?> GetByIdAsync(Guid walletId);
+    Task<WalletEntity?> GetByIdAsync(Guid walletId);
 
     /// <summary>
     /// TR: Bakiye değişikliği sırasında wallet satırını update lock ile getirir.
@@ -28,7 +29,7 @@ public interface IWalletRepository
     /// <param name="connection">TR: Açık bağlantı. EN: Open connection.</param>
     /// <param name="transaction">TR: Aktif SQL transaction. EN: Active SQL transaction.</param>
     /// <returns>TR: Wallet veya null. EN: Wallet or null.</returns>
-    Task<Wallet?> GetForUpdateAsync(Guid walletId, IDbConnection connection, IDbTransaction transaction);
+    Task<WalletEntity?> GetForUpdateAsync(Guid walletId, IDbConnection connection, IDbTransaction transaction);
 
     /// <summary>
     /// TR: Wallet finansal durumunu transaction içinde günceller.
@@ -38,7 +39,7 @@ public interface IWalletRepository
     /// <param name="wallet">TR: Wallet. EN: Wallet.</param>
     /// <param name="connection">TR: Açık bağlantı. EN: Open connection.</param>
     /// <param name="transaction">TR: Aktif transaction. EN: Active transaction.</param>
-    Task UpdateAsync(Wallet wallet, IDbConnection connection, IDbTransaction transaction);
+    Task UpdateAsync(WalletEntity wallet, IDbConnection connection, IDbTransaction transaction);
 
     /// <summary>
     /// TR: Wallet durumunu günceller; fraud sonrası block için kullanılır.

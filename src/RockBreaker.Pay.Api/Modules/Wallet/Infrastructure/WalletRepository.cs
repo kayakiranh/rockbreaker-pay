@@ -3,6 +3,7 @@ using Dapper;
 using RockBreaker.Pay.Infrastructure.Persistence;
 using RockBreaker.Pay.Modules.Wallet.Abstractions;
 using RockBreaker.Pay.Modules.Wallet.Domain;
+using WalletEntity = RockBreaker.Pay.Modules.Wallet.Domain.Wallet;
 
 namespace RockBreaker.Pay.Modules.Wallet.Infrastructure;
 
@@ -24,7 +25,7 @@ public sealed class WalletRepository : IWalletRepository
     public WalletRepository(IDbConnectionFactory connectionFactory) => _connectionFactory = connectionFactory;
 
     /// <inheritdoc />
-    public async Task<Wallet?> GetByIdAsync(Guid walletId)
+    public async Task<WalletEntity?> GetByIdAsync(Guid walletId)
     {
         const string sql = """
             SELECT Id, UserId, Balance, Currency, Status, SingleTransactionLimit,
@@ -34,11 +35,11 @@ public sealed class WalletRepository : IWalletRepository
             """;
 
         using var connection = _connectionFactory.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<Wallet>(sql, new { WalletId = walletId });
+        return await connection.QuerySingleOrDefaultAsync<WalletEntity>(sql, new { WalletId = walletId });
     }
 
     /// <inheritdoc />
-    public async Task<Wallet?> GetForUpdateAsync(
+    public async Task<WalletEntity?> GetForUpdateAsync(
         Guid walletId,
         IDbConnection connection,
         IDbTransaction transaction)
@@ -50,14 +51,14 @@ public sealed class WalletRepository : IWalletRepository
             WHERE Id = @WalletId;
             """;
 
-        return await connection.QuerySingleOrDefaultAsync<Wallet>(
+        return await connection.QuerySingleOrDefaultAsync<WalletEntity>(
             sql,
             new { WalletId = walletId },
             transaction);
     }
 
     /// <inheritdoc />
-    public Task UpdateAsync(Wallet wallet, IDbConnection connection, IDbTransaction transaction)
+    public Task UpdateAsync(WalletEntity wallet, IDbConnection connection, IDbTransaction transaction)
     {
         const string sql = """
             UPDATE dbo.Wallets
