@@ -63,6 +63,8 @@ builder.Services
 builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
+builder.Services.AddScoped<DatabaseBootstrapper>();
+builder.Services.AddScoped<DevelopmentDataSeeder>();
 builder.Services.AddScoped<IReadinessService, ReadinessService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -136,6 +138,19 @@ builder.Services.AddHttpClient<ICutoffClient, CutoffClient>(client =>
 });
 
 var app = builder.Build();
+
+if (app.Configuration.GetValue<bool>("DatabaseBootstrap:Enabled"))
+{
+    using var bootstrapScope = app.Services.CreateScope();
+    var bootstrapper = bootstrapScope.ServiceProvider.GetRequiredService<DatabaseBootstrapper>();
+    await bootstrapper.InitializeAsync();
+
+    if (app.Configuration.GetValue<bool>("DatabaseBootstrap:SeedDemoData"))
+    {
+        var seeder = bootstrapScope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>();
+        await seeder.SeedAsync();
+    }
+}
 
 app.UseMiddleware<RequestAuditMiddleware>();
 app.UseAuthentication();
