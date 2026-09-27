@@ -107,6 +107,10 @@ public sealed class WalletTransferServiceTests
 
         public Task<WalletEntity?> GetByIdAsync(Guid walletId) => Task.FromResult<WalletEntity?>(null);
 
+        public Task<WalletEntity?> GetByUserIdAsync(Guid userId) => Task.FromResult<WalletEntity?>(null);
+
+        public Task InsertAsync(WalletEntity wallet) => Task.CompletedTask;
+
         public Task<WalletEntity?> GetForUpdateAsync(
             Guid walletId,
             IDbConnection connection,
@@ -123,6 +127,11 @@ public sealed class WalletTransferServiceTests
             LastStatus = status;
             return Task.CompletedTask;
         }
+
+        public Task UpdateLimitsAsync(WalletEntity wallet) => Task.CompletedTask;
+
+        public Task<IReadOnlyCollection<WalletTransaction>> GetTransactionsAsync(Guid walletId) =>
+            Task.FromResult<IReadOnlyCollection<WalletTransaction>>(Array.Empty<WalletTransaction>());
     }
 
     private sealed class FakeTransferStore : IWalletTransferStore
