@@ -4,6 +4,7 @@ using RockBreaker.Pay.Common;
 using RockBreaker.Pay.Infrastructure.Persistence;
 using RockBreaker.Pay.Modules.Wallet.Abstractions;
 using RockBreaker.Pay.Modules.Wallet.Domain;
+using RockBreaker.Pay.Modules.Wallet.Application;
 
 namespace RockBreaker.Pay.Modules.Banking;
 
@@ -16,12 +17,17 @@ public sealed class ExternalWalletStore : IExternalWalletStore
 {
     private readonly IDbConnectionFactory _connectionFactory;
     private readonly IWalletRepository _walletRepository;
+    private readonly IWalletLimitGuard _limitGuard;
 
     /// <summary>TR: Store bağımlılıklarını alır. EN: Receives store dependencies. Architecture: Constructor Injection.</summary>
-    public ExternalWalletStore(IDbConnectionFactory connectionFactory, IWalletRepository walletRepository)
+    public ExternalWalletStore(
+        IDbConnectionFactory connectionFactory,
+        IWalletRepository walletRepository,
+        IWalletLimitGuard limitGuard)
     {
         _connectionFactory = connectionFactory;
         _walletRepository = walletRepository;
+        _limitGuard = limitGuard;
     }
 
     /// <inheritdoc />
@@ -141,10 +147,24 @@ public sealed class ExternalWalletStore : IExternalWalletStore
             return OperationResult<BankTransferResponse>.Fail("WALLET_NOT_ACTIVE", "Wallet is not active.");
         }
 
-        if (!creditWallet && wallet.Balance < amount)
+        if (!creditWallet)
         {
-            transaction.Rollback();
-            return OperationResult<BankTransferResponse>.Fail("INSUFFICIENT_BALANCE", "Wallet balance is insufficient.");
+            var limitResult = await _limitGuard.CheckAsync(wallet, amount, connection, transaction);
+            if (!limitResult.IsAllowed)
+            {
+                transaction.Rollback();
+                return OperationResult<BankTransferResponse>.Fail(
+                    limitResult.ErrorCode!,
+                    limitResult.ErrorMessage!);
+            }
+
+            if (wallet.Balance < amount)
+            {
+                transaction.Rollback();
+                return OperationResult<BankTransferResponse>.Fail(
+                    "INSUFFICIENT_BALANCE",
+                    "Wallet balance is insufficient.");
+            }
         }
 
         wallet.Balance += creditWallet ? amount : -amount;

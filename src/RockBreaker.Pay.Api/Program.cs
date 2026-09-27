@@ -75,6 +75,7 @@ builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<IWalletTransferStore, WalletTransferStore>();
 builder.Services.AddScoped<IWalletTransferService, WalletTransferService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<IWalletLimitGuard, WalletLimitGuard>();
 builder.Services.AddScoped<IMoneyRequestService, MoneyRequestService>();
 builder.Services.AddScoped<IPaymentInstructionService, PaymentInstructionService>();
 builder.Services.AddScoped<IPaymentInstructionProcessor, PaymentInstructionProcessor>();

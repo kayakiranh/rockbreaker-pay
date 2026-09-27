@@ -4,6 +4,7 @@ using RockBreaker.Pay.Common;
 using RockBreaker.Pay.Infrastructure.Persistence;
 using RockBreaker.Pay.Modules.Wallet.Abstractions;
 using RockBreaker.Pay.Modules.Wallet.Domain;
+using RockBreaker.Pay.Modules.Wallet.Application;
 
 namespace RockBreaker.Pay.Modules.Government;
 
@@ -16,6 +17,7 @@ public sealed class BillPaymentStore : IBillPaymentStore
 {
     private readonly IDbConnectionFactory _connectionFactory;
     private readonly IWalletRepository _walletRepository;
+    private readonly IWalletLimitGuard _limitGuard;
 
     /// <summary>
     /// TR: Store bağımlılıklarını alır.
@@ -24,10 +26,12 @@ public sealed class BillPaymentStore : IBillPaymentStore
     /// </summary>
     public BillPaymentStore(
         IDbConnectionFactory connectionFactory,
-        IWalletRepository walletRepository)
+        IWalletRepository walletRepository,
+        IWalletLimitGuard limitGuard)
     {
         _connectionFactory = connectionFactory;
         _walletRepository = walletRepository;
+        _limitGuard = limitGuard;
     }
 
     /// <inheritdoc />
@@ -73,12 +77,13 @@ public sealed class BillPaymentStore : IBillPaymentStore
                 "Wallet balance is insufficient.");
         }
 
-        if (amount > wallet.SingleTransactionLimit)
+        var limitResult = await _limitGuard.CheckAsync(wallet, amount, connection, transaction);
+        if (!limitResult.IsAllowed)
         {
             transaction.Rollback();
             return OperationResult<BillPaymentResponse>.Fail(
-                "USER_LIMIT_EXCEEDED",
-                "Single transaction limit was exceeded.");
+                limitResult.ErrorCode!,
+                limitResult.ErrorMessage!);
         }
 
         wallet.Balance -= amount;

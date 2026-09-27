@@ -18,6 +18,7 @@ public sealed class WalletTransferStore : IWalletTransferStore
 {
     private readonly IDbConnectionFactory _connectionFactory;
     private readonly IWalletRepository _walletRepository;
+    private readonly IWalletLimitGuard _limitGuard;
 
     /// <summary>
     /// TR: Store bağımlılıklarını alır.
@@ -26,10 +27,14 @@ public sealed class WalletTransferStore : IWalletTransferStore
     /// </summary>
     /// <param name="connectionFactory">TR: DB bağlantı fabrikası. EN: DB connection factory.</param>
     /// <param name="walletRepository">TR: Wallet repository. EN: Wallet repository.</param>
-    public WalletTransferStore(IDbConnectionFactory connectionFactory, IWalletRepository walletRepository)
+    public WalletTransferStore(
+        IDbConnectionFactory connectionFactory,
+        IWalletRepository walletRepository,
+        IWalletLimitGuard limitGuard)
     {
         _connectionFactory = connectionFactory;
         _walletRepository = walletRepository;
+        _limitGuard = limitGuard;
     }
 
     /// <inheritdoc />
@@ -87,10 +92,13 @@ public sealed class WalletTransferStore : IWalletTransferStore
             return OperationResult<TransferResponse>.Fail("CURRENCY_MISMATCH", "Wallet and transaction currencies must match.");
         }
 
-        if (request.Amount > source.SingleTransactionLimit)
+        var limitResult = await _limitGuard.CheckAsync(source, request.Amount, connection, transaction);
+        if (!limitResult.IsAllowed)
         {
             transaction.Rollback();
-            return OperationResult<TransferResponse>.Fail("USER_LIMIT_EXCEEDED", "Single transaction limit was exceeded.");
+            return OperationResult<TransferResponse>.Fail(
+                limitResult.ErrorCode!,
+                limitResult.ErrorMessage!);
         }
 
         if (source.Balance < request.Amount)
