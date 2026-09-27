@@ -80,6 +80,7 @@ builder.Services.AddHostedService<PaymentInstructionWorker>();
 builder.Services.AddScoped<IOutboxNotificationProcessor, OutboxNotificationProcessor>();
 builder.Services.AddHostedService<OutboxNotificationWorker>();
 builder.Services.AddScoped<IFraudEvaluator, DatabaseFraudEvaluator>();
+builder.Services.AddScoped<IFraudRuleService, FraudRuleService>();
 builder.Services.AddScoped<IValidator<TransferRequest>, TransferRequestValidator>();
 builder.Services.AddScoped<IAuditLogWriter, AuditLogWriter>();
 builder.Services.AddScoped<IRegulatoryReportService, RegulatoryReportService>();
