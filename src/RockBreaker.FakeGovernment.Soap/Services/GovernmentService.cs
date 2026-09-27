@@ -9,12 +9,7 @@ namespace RockBreaker.FakeGovernment.Services;
 /// </summary>
 public sealed class GovernmentService : IGovernmentService
 {
-    private static readonly ConcurrentDictionary<Guid, BillDto> Bills = new(
-        new[]
-        {
-            new KeyValuePair<Guid, BillDto>(Guid.NewGuid(), new BillDto { Id = Guid.NewGuid(), Institution = "Electricity", Amount = 850 }),
-            new KeyValuePair<Guid, BillDto>(Guid.NewGuid(), new BillDto { Id = Guid.NewGuid(), Institution = "Water", Amount = 320 })
-        });
+    private static readonly ConcurrentDictionary<Guid, BillDto> Bills = CreateBills();
 
     /// <inheritdoc />
     public BillDto[] GetBills(string citizenNumber) => Bills.Values.Where(x => !x.IsPaid).ToArray();
@@ -29,5 +24,21 @@ public sealed class GovernmentService : IGovernmentService
 
         bill.IsPaid = true;
         return new PaymentResultDto { Success = true, Message = "Bill paid." };
+    }
+
+    private static ConcurrentDictionary<Guid, BillDto> CreateBills()
+    {
+        var electricityId = Guid.NewGuid();
+        var waterId = Guid.NewGuid();
+
+        return new ConcurrentDictionary<Guid, BillDto>(new[]
+        {
+            new KeyValuePair<Guid, BillDto>(
+                electricityId,
+                new BillDto { Id = electricityId, Institution = "Electricity", Amount = 850 }),
+            new KeyValuePair<Guid, BillDto>(
+                waterId,
+                new BillDto { Id = waterId, Institution = "Water", Amount = 320 })
+        });
     }
 }
