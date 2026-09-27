@@ -8,6 +8,5 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.21" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
-    <PackageReference Include="Elastic.Serilog.Sinks" Version="8.6.0" />
   </ItemGroup>
 </Project>
