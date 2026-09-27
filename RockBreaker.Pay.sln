@@ -1,0 +1,54 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RockBreaker.Pay.Api", "src\RockBreaker.Pay.Api\RockBreaker.Pay.Api.csproj", "{B4F64F5A-DFDF-4A5D-B3BC-AE792F4276F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RockBreaker.FakeBanking.Api", "src\RockBreaker.FakeBanking.Api\RockBreaker.FakeBanking.Api.csproj", "{46FDA653-EA05-4F3C-8EBE-8498862AA947}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RockBreaker.FakeCampaign.Api", "src\RockBreaker.FakeCampaign.Api\RockBreaker.FakeCampaign.Api.csproj", "{A878D1FB-5EA0-4E39-95EA-847EB2EA12E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RockBreaker.FakeNotification.Api", "src\RockBreaker.FakeNotification.Api\RockBreaker.FakeNotification.Api.csproj", "{908B71A3-A0A9-4BF9-AB6D-AFC7B7012999}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RockBreaker.FakeCutoff.Api", "src\RockBreaker.FakeCutoff.Api\RockBreaker.FakeCutoff.Api.csproj", "{B16547DF-EA57-4D2D-9E99-2602BFF51BC4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RockBreaker.FakeGovernment.Soap", "src\RockBreaker.FakeGovernment.Soap\RockBreaker.FakeGovernment.Soap.csproj", "{A685071A-7533-4ABE-84C0-DFD0C70A5190}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RockBreaker.Pay.UnitTests", "tests\RockBreaker.Pay.UnitTests\RockBreaker.Pay.UnitTests.csproj", "{7B111CFC-7577-4C3F-8FD4-CFC07B08D696}"
+EndProject
+Global
+  GlobalSection(SolutionConfigurationPlatforms) = preSolution
+    Debug|Any CPU = Debug|Any CPU
+    Release|Any CPU = Release|Any CPU
+  EndGlobalSection
+  GlobalSection(ProjectConfigurationPlatforms) = postSolution
+    {B4F64F5A-DFDF-4A5D-B3BC-AE792F4276F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {B4F64F5A-DFDF-4A5D-B3BC-AE792F4276F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {B4F64F5A-DFDF-4A5D-B3BC-AE792F4276F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {B4F64F5A-DFDF-4A5D-B3BC-AE792F4276F2}.Release|Any CPU.Build.0 = Release|Any CPU
+    {46FDA653-EA05-4F3C-8EBE-8498862AA947}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {46FDA653-EA05-4F3C-8EBE-8498862AA947}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {46FDA653-EA05-4F3C-8EBE-8498862AA947}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {46FDA653-EA05-4F3C-8EBE-8498862AA947}.Release|Any CPU.Build.0 = Release|Any CPU
+    {A878D1FB-5EA0-4E39-95EA-847EB2EA12E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {A878D1FB-5EA0-4E39-95EA-847EB2EA12E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {A878D1FB-5EA0-4E39-95EA-847EB2EA12E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {A878D1FB-5EA0-4E39-95EA-847EB2EA12E0}.Release|Any CPU.Build.0 = Release|Any CPU
+    {908B71A3-A0A9-4BF9-AB6D-AFC7B7012999}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {908B71A3-A0A9-4BF9-AB6D-AFC7B7012999}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {908B71A3-A0A9-4BF9-AB6D-AFC7B7012999}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {908B71A3-A0A9-4BF9-AB6D-AFC7B7012999}.Release|Any CPU.Build.0 = Release|Any CPU
+    {B16547DF-EA57-4D2D-9E99-2602BFF51BC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {B16547DF-EA57-4D2D-9E99-2602BFF51BC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {B16547DF-EA57-4D2D-9E99-2602BFF51BC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {B16547DF-EA57-4D2D-9E99-2602BFF51BC4}.Release|Any CPU.Build.0 = Release|Any CPU
+    {A685071A-7533-4ABE-84C0-DFD0C70A5190}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {A685071A-7533-4ABE-84C0-DFD0C70A5190}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {A685071A-7533-4ABE-84C0-DFD0C70A5190}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {A685071A-7533-4ABE-84C0-DFD0C70A5190}.Release|Any CPU.Build.0 = Release|Any CPU
+    {7B111CFC-7577-4C3F-8FD4-CFC07B08D696}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {7B111CFC-7577-4C3F-8FD4-CFC07B08D696}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {7B111CFC-7577-4C3F-8FD4-CFC07B08D696}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {7B111CFC-7577-4C3F-8FD4-CFC07B08D696}.Release|Any CPU.Build.0 = Release|Any CPU
+  EndGlobalSection
+EndGlobal
