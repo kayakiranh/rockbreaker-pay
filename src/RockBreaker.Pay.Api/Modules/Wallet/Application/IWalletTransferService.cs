@@ -23,4 +23,20 @@ public interface IWalletTransferService
         TransferRequest request,
         string idempotencyKey,
         string correlationId);
+
+    /// <summary>
+    /// TR: HTTP kullanıcısının kaynak wallet sahibi olduğunu doğrulayıp transferi çalıştırır.
+    /// EN: Verifies that the HTTP user owns the source wallet and then executes the transfer.
+    /// Architecture: Authorization Guard + Application Service.
+    /// </summary>
+    /// <param name="userId">TR: Authenticated kullanıcı kimliği. EN: Authenticated user identifier.</param>
+    /// <param name="request">TR: Transfer isteği. EN: Transfer request.</param>
+    /// <param name="idempotencyKey">TR: Idempotency anahtarı. EN: Idempotency key.</param>
+    /// <param name="correlationId">TR: Takip kimliği. EN: Correlation identifier.</param>
+    /// <returns>TR: Transfer sonucu. EN: Transfer result.</returns>
+    Task<OperationResult<TransferResponse>> TransferForUserAsync(
+        Guid userId,
+        TransferRequest request,
+        string idempotencyKey,
+        string correlationId);
 }

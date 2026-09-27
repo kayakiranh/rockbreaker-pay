@@ -41,6 +41,13 @@ public sealed class BankTransferService : IBankTransferService
         string idempotencyKey,
         string correlationId)
     {
+        if (string.IsNullOrWhiteSpace(idempotencyKey))
+        {
+            return OperationResult<BankTransferResponse>.Fail(
+                "IDEMPOTENCY_KEY_REQUIRED",
+                "Idempotency-Key header is required.");
+        }
+
         var wallet = await _walletRepository.GetByUserIdAsync(userId);
         if (wallet is null)
             return OperationResult<BankTransferResponse>.Fail("WALLET_NOT_FOUND", "Wallet was not found.");
@@ -78,6 +85,13 @@ public sealed class BankTransferService : IBankTransferService
         string idempotencyKey,
         string correlationId)
     {
+        if (string.IsNullOrWhiteSpace(idempotencyKey))
+        {
+            return OperationResult<BankTransferResponse>.Fail(
+                "IDEMPOTENCY_KEY_REQUIRED",
+                "Idempotency-Key header is required.");
+        }
+
         var wallet = await _walletRepository.GetByUserIdAsync(userId);
         if (wallet is null)
             return OperationResult<BankTransferResponse>.Fail("WALLET_NOT_FOUND", "Wallet was not found.");

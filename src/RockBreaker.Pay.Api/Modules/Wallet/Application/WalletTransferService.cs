@@ -41,6 +41,31 @@ public sealed class WalletTransferService : IWalletTransferService
     }
 
     /// <inheritdoc />
+    public async Task<OperationResult<TransferResponse>> TransferForUserAsync(
+        Guid userId,
+        TransferRequest request,
+        string idempotencyKey,
+        string correlationId)
+    {
+        var sourceWallet = await _walletRepository.GetByIdAsync(request.SourceWalletId);
+        if (sourceWallet is null)
+        {
+            return OperationResult<TransferResponse>.Fail(
+                "WALLET_NOT_FOUND",
+                "Source wallet was not found.");
+        }
+
+        if (sourceWallet.UserId != userId)
+        {
+            return OperationResult<TransferResponse>.Fail(
+                "FORBIDDEN_SOURCE_WALLET",
+                "Authenticated user does not own the source wallet.");
+        }
+
+        return await TransferAsync(request, idempotencyKey, correlationId);
+    }
+
+    /// <inheritdoc />
     public async Task<OperationResult<TransferResponse>> TransferAsync(
         TransferRequest request,
         string idempotencyKey,

@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RockBreaker.Pay.Common;
 using RockBreaker.Pay.Modules.Wallet.Application;
@@ -11,6 +13,7 @@ namespace RockBreaker.Pay.Modules.Wallet.Controllers;
 /// Architecture: Thin Controller; business orchestration stays in Application Service.
 /// </summary>
 [ApiController]
+[Authorize]
 [Route("api/wallet/transfers")]
 public sealed class WalletTransfersController : ControllerBase
 {
@@ -25,9 +28,9 @@ public sealed class WalletTransfersController : ControllerBase
     public WalletTransfersController(IWalletTransferService service) => _service = service;
 
     /// <summary>
-    /// TR: Bir wallet'tan başka bir wallet'a para transfer eder.
-    /// EN: Transfers money from one wallet to another.
-    /// Architecture: REST Controller + Idempotent Command.
+    /// TR: Authenticated kullanıcının kendi wallet'ından başka bir wallet'a para transfer eder.
+    /// EN: Transfers money from the authenticated user's own wallet to another wallet.
+    /// Architecture: REST Controller + Idempotent Command + Ownership Authorization.
     /// </summary>
     /// <param name="request">TR: Transfer bilgileri. EN: Transfer details.</param>
     /// <param name="idempotencyKey">TR: Aynı isteğin iki kez uygulanmasını engelleyen header. EN: Header preventing duplicate execution.</param>
@@ -39,8 +42,25 @@ public sealed class WalletTransfersController : ControllerBase
         [FromBody] TransferRequest request,
         [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey)
     {
+        var userId = GetUserId();
         var correlationId = HttpContext.TraceIdentifier;
-        var result = await _service.TransferAsync(request, idempotencyKey ?? string.Empty, correlationId);
+
+        var result = await _service.TransferForUserAsync(
+            userId,
+            request,
+            idempotencyKey ?? string.Empty,
+            correlationId);
+
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
+
+    /// <summary>
+    /// TR: JWT claim içinden authenticated kullanıcı kimliğini döndürür.
+    /// EN: Returns the authenticated user identifier from the JWT claim.
+    /// Architecture: Claims-Based Authorization Helper.
+    /// </summary>
+    /// <returns>TR: Kullanıcı kimliği. EN: User identifier.</returns>
+    private Guid GetUserId() =>
+        Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? throw new InvalidOperationException("Authenticated user id claim is missing."));
 }
