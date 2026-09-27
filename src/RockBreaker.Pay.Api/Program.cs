@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using RockBreaker.Pay.Infrastructure.Auditing;
 using RockBreaker.Pay.Infrastructure.Persistence;
 using RockBreaker.Pay.Modules.Cutoff;
+using RockBreaker.Pay.Modules.Banking;
 using RockBreaker.Pay.Modules.Fraud;
 using RockBreaker.Pay.Modules.Identity.Abstractions;
 using RockBreaker.Pay.Modules.Identity.Application;
@@ -75,11 +76,19 @@ builder.Services.AddHostedService<PaymentInstructionWorker>();
 builder.Services.AddScoped<IFraudEvaluator, DatabaseFraudEvaluator>();
 builder.Services.AddScoped<IValidator<TransferRequest>, TransferRequestValidator>();
 builder.Services.AddScoped<IAuditLogWriter, AuditLogWriter>();
+builder.Services.AddScoped<IExternalWalletStore, ExternalWalletStore>();
+builder.Services.AddScoped<IBankTransferService, BankTransferService>();
 
 builder.Services.AddHttpClient<IElasticAuditWriter, ElasticAuditWriter>(client =>
 {
     client.BaseAddress = new Uri(
         builder.Configuration["Elasticsearch:BaseUrl"] ?? "http://localhost:9200/");
+});
+
+builder.Services.AddHttpClient<IBankingClient, BankingClient>(client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["ExternalServices:BankingBaseUrl"] ?? "http://localhost:5101/");
 });
 
 builder.Services.AddHttpClient<ICutoffClient, CutoffClient>(client =>

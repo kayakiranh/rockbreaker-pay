@@ -88,6 +88,34 @@ public sealed class BankingController : ControllerBase
     /// </summary>
     /// <param name="accountId">TR: Banka hesap kimliği. EN: Bank account identifier.</param>
     /// <returns>TR: Hareket listesi. EN: Movement list.</returns>
+    [HttpPost("transfers/reverse")]
+    public ActionResult<BankMovement> Reverse([FromBody] ReverseBankTransferRequest request)
+    {
+        if (!Accounts.TryGetValue(request.BankAccountId, out var account))
+        {
+            return NotFound();
+        }
+
+        if (string.Equals(request.OriginalType, "BankToWallet", StringComparison.OrdinalIgnoreCase))
+        {
+            account.Balance += request.Amount;
+            return Ok(account.AddMovement("BankToWalletReversal", request.Amount, request.WalletId));
+        }
+
+        if (account.Balance < request.Amount)
+        {
+            return BadRequest("Insufficient bank balance for reversal.");
+        }
+
+        account.Balance -= request.Amount;
+        return Ok(account.AddMovement("WalletToBankReversal", -request.Amount, request.WalletId));
+    }
+
+    /// <summary>
+    /// TR: Banka hesabının tüm hareketlerini döndürür.
+    /// EN: Returns all movements of a bank account.
+    /// Architecture: REST Query.
+    /// </summary>
     [HttpGet("accounts/{accountId:guid}/movements")]
     public ActionResult<IReadOnlyCollection<BankMovement>> GetMovements(Guid accountId)
     {
@@ -95,6 +123,23 @@ public sealed class BankingController : ControllerBase
             ? Ok(account.Movements)
             : NotFound();
     }
+}
+
+/// <summary>
+/// TR: Fake banka telafi isteğidir.
+/// EN: Fake bank compensation request.
+/// Architecture: Saga Compensation DTO.
+/// </summary>
+public sealed class ReverseBankTransferRequest
+{
+    /// <summary>TR: Banka hesap kimliği. EN: Bank account identifier. Architecture: DTO Property.</summary>
+    public Guid BankAccountId { get; init; }
+    /// <summary>TR: Wallet kimliği. EN: Wallet identifier. Architecture: DTO Property.</summary>
+    public Guid WalletId { get; init; }
+    /// <summary>TR: Tutar. EN: Amount. Architecture: DTO Property.</summary>
+    public decimal Amount { get; init; }
+    /// <summary>TR: Orijinal işlem tipi. EN: Original transaction type. Architecture: Compensation Metadata.</summary>
+    public string OriginalType { get; init; } = string.Empty;
 }
 
 /// <summary>
