@@ -86,8 +86,8 @@ public sealed class BankingController : ControllerBase
     /// EN: Returns all movements of a bank account.
     /// Architecture: REST Query.
     /// </summary>
-    /// <param name="accountId">TR: Banka hesap kimliği. EN: Bank account identifier.</param>
-    /// <returns>TR: Hareket listesi. EN: Movement list.</returns>
+    /// <param name="request">TR: Telafi edilecek banka hareketinin bilgileri. EN: Details of the bank movement to compensate.</param>
+    /// <returns>TR: Oluşturulan ters banka hareketi. EN: Created reversing bank movement.</returns>
     [HttpPost("transfers/reverse")]
     public ActionResult<BankMovement> Reverse([FromBody] ReverseBankTransferRequest request)
     {

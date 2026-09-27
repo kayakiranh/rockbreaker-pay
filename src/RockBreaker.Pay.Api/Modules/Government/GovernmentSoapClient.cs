@@ -84,7 +84,7 @@ public sealed class GovernmentSoapClient : IGovernmentSoapClient
             """;
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "GovernmentService.svc");
-        request.Headers.TryAddWithoutValidation("SOAPAction", $""{ServiceNamespace}{action}"");
+        request.Headers.TryAddWithoutValidation("SOAPAction", $"\"{ServiceNamespace}{action}\"");
         request.Content = new StringContent(envelope, Encoding.UTF8, "text/xml");
 
         using var response = await _httpClient.SendAsync(request);
