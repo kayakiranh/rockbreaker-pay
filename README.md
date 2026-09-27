@@ -195,29 +195,32 @@ Tek sorgu maksimum 366 gün ve 100.000 satır ile sınırlandırılmıştır.
 - `FraudRulesController`
 - `ReportsController`
 - `HealthController`
-- `CustomerJourneyController`
+- `TransferJourneyController`
+- `BillPaymentJourneyController`
+- `CampaignTransferJourneyController`
+- `AutomaticPaymentJourneyController`
+- `GovernmentReportController`
 
-## Customer success journey
+## Customer success journeys
 
-Register'dan başarılı wallet transferine kadar gerekli endpoint sırası ve örnek success request'leri tek endpoint'ten görülebilir:
-
-```text
-GET /api/customer-journey/register-to-transfer
-```
-
-Bu endpoint işlem yapmaz; aşağıdaki gerçek akışı dokümante eder:
+Dört ana business case ayrı journey controller'larında success request örnekleri ve entegrasyon zincirleriyle dokümante edilir:
 
 ```text
-Register
-  -> KYC Verify
-  -> Create Wallet
-  -> Open Fake Bank Account
-  -> Bank to Wallet
-  -> Check Balance
-  -> Wallet to Wallet Transfer
+GET /api/customer-journey/transfer
+GET /api/customer-journey/bill-payment
+GET /api/customer-journey/campaign-transfer
+GET /api/customer-journey/automatic-payment
 ```
 
-Register cevabı access token ürettiği için ilk journey'de ayrıca login zorunlu değildir. Login, sonraki oturum için opsiyonel adım olarak gösterilir.
+Journey response'ları yalnız dokümantasyondur; gerçek business endpoint'lerini çağırmaz. Her step hangi gerçek endpoint'in kullanılacağını, request örneğini ve KYC/Fraud/limit/ledger/outbox/fake-service entegrasyonlarını gösterir.
+
+## Government example report
+
+Admin/Auditor için transaction, fraud ve maskelenmiş başarısız HTTP audit detaylarını tek response'ta birleştiren örnek resmi kurum raporu:
+
+```text
+GET /api/reports/government?fromUtc=<utc>&toUtc=<utc>&walletId=<optional-guid>
+```
 
 ## Fake service responsibilities
 
@@ -231,7 +234,10 @@ Register cevabı access token ürettiği için ilk journey'de ayrıca login zoru
 
 ### FakeCampaign
 
-Dummy company campaign list.
+- Dummy company campaign list
+- Customer campaign participation
+- Participation lookup
+- Main API campaign transfer flow reuses the secure core wallet-transfer service
 
 ### FakeNotification
 
@@ -324,6 +330,7 @@ States:
 ## Notifications
 
 Financial wallet-to-wallet transactions write `WalletTransferCompleted` to `OutboxMessages`.
+Successful government bill payments publish `BillPaymentCompleted` after SOAP confirmation.
 
 `OutboxNotificationWorker`:
 

@@ -100,6 +100,7 @@ builder.Services.AddScoped<ICampaignService, CampaignService>();
 builder.Services.AddScoped<IValidator<TransferRequest>, TransferRequestValidator>();
 builder.Services.AddScoped<IAuditLogWriter, AuditLogWriter>();
 builder.Services.AddScoped<IRegulatoryReportService, RegulatoryReportService>();
+builder.Services.AddScoped<IGovernmentReportService, GovernmentReportService>();
 builder.Services.AddScoped<IBillPaymentStore, BillPaymentStore>();
 builder.Services.AddScoped<IBillPaymentService, BillPaymentService>();
 builder.Services.AddScoped<IExternalWalletStore, ExternalWalletStore>();
