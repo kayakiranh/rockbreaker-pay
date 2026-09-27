@@ -18,7 +18,13 @@ builder.Host.UseSerilog((_, configuration) =>
         .WriteTo.Console());
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+
+builder.Services.AddOpenApiDocument(settings =>
+{
+    settings.DocumentName = "v1";
+    settings.Title = "RockBreaker Pay API";
+    settings.Version = "v1";
+});
 
 builder.Services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
@@ -43,8 +49,13 @@ builder.Services.AddHttpClient<ICutoffClient, CutoffClient>(client =>
 var app = builder.Build();
 
 app.UseMiddleware<RequestAuditMiddleware>();
+
+app.UseOpenApi(settings =>
+{
+    settings.Path = "/openapi/{documentName}.json";
+});
+
 app.MapControllers();
-app.MapOpenApi("/openapi/{documentName}.json");
 app.MapGet("/health/live", () => Results.Ok(new { status = "Healthy" }));
 
 app.Run();

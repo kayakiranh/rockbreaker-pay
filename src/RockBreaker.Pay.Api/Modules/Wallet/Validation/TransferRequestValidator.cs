@@ -20,7 +20,7 @@ public sealed class TransferRequestValidator : AbstractValidator<TransferRequest
         RuleFor(x => x.SourceWalletId).NotEmpty();
         RuleFor(x => x.DestinationWalletId).NotEmpty();
         RuleFor(x => x.DestinationWalletId).NotEqual(x => x.SourceWalletId);
-        RuleFor(x => x.Amount).GreaterThan(0).ScalePrecision(2, 18);
+        RuleFor(x => x.Amount).GreaterThan(0).PrecisionScale(18, 2, false);
         RuleFor(x => x.Currency).Equal("TRY");
     }
 }
