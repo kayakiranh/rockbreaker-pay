@@ -4,6 +4,7 @@ using Dapper;
 using RockBreaker.Pay.Common;
 using RockBreaker.Pay.Infrastructure.Persistence;
 using RockBreaker.Pay.Modules.Wallet.Abstractions;
+using RockBreaker.Pay.Modules.Wallet.Application;
 using RockBreaker.Pay.Modules.Wallet.Contracts;
 using RockBreaker.Pay.Modules.Wallet.Domain;
 
