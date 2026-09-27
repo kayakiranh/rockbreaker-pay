@@ -30,6 +30,7 @@ Dış sistemler gerçek servisleri simüle eden ayrı process/projelerdir:
 - `RockBreaker.FakeNotification.Api`
 - `RockBreaker.FakeCutoff.Api`
 - `RockBreaker.FakeGovernment.Soap`
+- `RockBreaker.FakeKyc.Api`
 
 ## Core architectural patterns
 
@@ -222,6 +223,18 @@ Dummy company campaign list.
 - Weekend/holiday rules
 - Wallet-to-wallet remains available 24/7
 
+### FakeKyc
+
+Harici KYC sağlayıcısını simüle eder:
+
+- `POST /api/kyc/verifications`
+- `GET /api/kyc/verifications/{verificationId}`
+- normal kullanıcı verisi -> `Verified`
+- `@manual.local` e-posta domaini -> `Pending`
+- `@reject.local` e-posta domaini -> `Rejected`
+
+Ana API'deki `POST /api/kyc/submit` bu servisi çağırır. Provider sonucu `dbo.KycEvents` audit geçmişine provider verification ID ve gerekçesiyle yazılır. `Pending` sonuçlar Admin review akışına devam eder.
+
 ### FakeGovernment SOAP
 
 CoreWCF SOAP endpoint:
@@ -326,6 +339,7 @@ Default development ports:
 | FakeNotification | 5103 |
 | FakeCutoff | 5104 |
 | FakeGovernment SOAP | 5105 |
+| FakeKyc | 5106 |
 | MSSQL | 1433 |
 | Elasticsearch | 9200 |
 
@@ -338,6 +352,7 @@ dotnet run --project src/RockBreaker.FakeCampaign.Api --urls http://localhost:51
 dotnet run --project src/RockBreaker.FakeNotification.Api --urls http://localhost:5103
 dotnet run --project src/RockBreaker.FakeCutoff.Api --urls http://localhost:5104
 dotnet run --project src/RockBreaker.FakeGovernment.Soap --urls http://localhost:5105
+dotnet run --project src/RockBreaker.FakeKyc.Api --urls http://localhost:5106
 ```
 
 ## Database
@@ -354,6 +369,9 @@ database/scripts/004_wallet_user_relation.sql
 database/scripts/005_money_requests.sql
 database/scripts/006_payment_instructions.sql
 database/scripts/007_fraud_events.sql
+database/scripts/008_payment_instruction_reliability.sql
+database/scripts/009_kyc_events.sql
+database/scripts/010_kyc_provider_reference.sql
 ```
 
 Yeni DB değişikliklerinde mevcut script değiştirilmez; yeni sıra numaralı script eklenir.

@@ -76,6 +76,13 @@ builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<IKycGuard, KycGuard>();
 builder.Services.AddScoped<IKycService, KycService>();
 
+builder.Services.AddHttpClient<IKycProviderClient, KycProviderClient>(client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["ExternalServices:KycBaseUrl"] ?? "http://localhost:5106/");
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
+
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<IWalletTransferStore, WalletTransferStore>();
 builder.Services.AddScoped<IWalletTransferService, WalletTransferService>();
