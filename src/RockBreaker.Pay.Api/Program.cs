@@ -14,6 +14,7 @@ using RockBreaker.Pay.Modules.Identity.Infrastructure;
 using RockBreaker.Pay.Modules.Identity.Mapping;
 using RockBreaker.Pay.Modules.Identity.Security;
 using RockBreaker.Pay.Modules.MoneyRequests;
+using RockBreaker.Pay.Modules.Notifications;
 using RockBreaker.Pay.Modules.Instructions;
 using RockBreaker.Pay.Modules.Wallet.Abstractions;
 using RockBreaker.Pay.Modules.Wallet.Application;
@@ -74,6 +75,8 @@ builder.Services.AddScoped<IMoneyRequestService, MoneyRequestService>();
 builder.Services.AddScoped<IPaymentInstructionService, PaymentInstructionService>();
 builder.Services.AddScoped<IPaymentInstructionProcessor, PaymentInstructionProcessor>();
 builder.Services.AddHostedService<PaymentInstructionWorker>();
+builder.Services.AddScoped<IOutboxNotificationProcessor, OutboxNotificationProcessor>();
+builder.Services.AddHostedService<OutboxNotificationWorker>();
 builder.Services.AddScoped<IFraudEvaluator, DatabaseFraudEvaluator>();
 builder.Services.AddScoped<IValidator<TransferRequest>, TransferRequestValidator>();
 builder.Services.AddScoped<IAuditLogWriter, AuditLogWriter>();
@@ -84,6 +87,12 @@ builder.Services.AddHttpClient<IElasticAuditWriter, ElasticAuditWriter>(client =
 {
     client.BaseAddress = new Uri(
         builder.Configuration["Elasticsearch:BaseUrl"] ?? "http://localhost:9200/");
+});
+
+builder.Services.AddHttpClient<INotificationClient, NotificationClient>(client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["ExternalServices:NotificationBaseUrl"] ?? "http://localhost:5103/");
 });
 
 builder.Services.AddHttpClient<ICampaignClient, CampaignClient>(client =>
