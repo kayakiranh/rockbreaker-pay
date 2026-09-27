@@ -195,6 +195,29 @@ Tek sorgu maksimum 366 gün ve 100.000 satır ile sınırlandırılmıştır.
 - `FraudRulesController`
 - `ReportsController`
 - `HealthController`
+- `CustomerJourneyController`
+
+## Customer success journey
+
+Register'dan başarılı wallet transferine kadar gerekli endpoint sırası ve örnek success request'leri tek endpoint'ten görülebilir:
+
+```text
+GET /api/customer-journey/register-to-transfer
+```
+
+Bu endpoint işlem yapmaz; aşağıdaki gerçek akışı dokümante eder:
+
+```text
+Register
+  -> KYC Verify
+  -> Create Wallet
+  -> Open Fake Bank Account
+  -> Bank to Wallet
+  -> Check Balance
+  -> Wallet to Wallet Transfer
+```
+
+Register cevabı access token ürettiği için ilk journey'de ayrıca login zorunlu değildir. Login, sonraki oturum için opsiyonel adım olarak gösterilir.
 
 ## Fake service responsibilities
 
