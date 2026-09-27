@@ -1,6 +1,7 @@
 using System.Data;
 using FluentValidation;
 using RockBreaker.Pay.Common;
+using RockBreaker.Pay.Modules.Compliance;
 using RockBreaker.Pay.Modules.Fraud;
 using RockBreaker.Pay.Modules.Wallet.Abstractions;
 using RockBreaker.Pay.Modules.Wallet.Application;
@@ -40,7 +41,8 @@ public sealed class WalletTransferServiceTests
             new TransferRequestValidator(),
             fraud,
             repository,
-            store);
+            store,
+            new VerifiedKycGuard());
 
         var result = await service.TransferAsync(
             new TransferRequest
@@ -73,7 +75,8 @@ public sealed class WalletTransferServiceTests
             new TransferRequestValidator(),
             new FakeFraudEvaluator(new FraudDecision { Action = FraudAction.Allow }),
             new FakeWalletRepository(),
-            store);
+            store,
+            new VerifiedKycGuard());
 
         var result = await service.TransferAsync(
             new TransferRequest
@@ -89,6 +92,13 @@ public sealed class WalletTransferServiceTests
         Assert.False(result.IsSuccess);
         Assert.Equal("IDEMPOTENCY_KEY_REQUIRED", result.ErrorCode);
         Assert.False(store.WasCalled);
+    }
+
+    private sealed class VerifiedKycGuard : IKycGuard
+    {
+        public Task<bool> IsUserVerifiedAsync(Guid userId) => Task.FromResult(true);
+
+        public Task<bool> IsWalletOwnerVerifiedAsync(Guid walletId) => Task.FromResult(true);
     }
 
     private sealed class FakeFraudEvaluator : IFraudEvaluator

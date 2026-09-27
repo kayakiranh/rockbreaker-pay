@@ -31,4 +31,9 @@ public interface IUserRepository
     /// <param name="userId">TR: Kullanıcı kimliği. EN: User identifier.</param>
     /// <param name="passwordHash">TR: Yeni hash. EN: New hash.</param>
     Task UpdatePasswordAsync(Guid userId, string passwordHash);
+
+    /// <summary>TR: Kullanıcının KYC durumunu günceller. EN: Updates the user's KYC status. Architecture: Repository Command.</summary>
+    /// <param name="userId">TR: Kullanıcı kimliği. EN: User identifier.</param>
+    /// <param name="kycStatus">TR: Yeni KYC durumu. EN: New KYC status.</param>
+    Task UpdateKycStatusAsync(Guid userId, string kycStatus);
 }

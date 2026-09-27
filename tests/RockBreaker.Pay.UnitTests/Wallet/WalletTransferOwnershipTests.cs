@@ -1,5 +1,6 @@
 using System.Data;
 using RockBreaker.Pay.Common;
+using RockBreaker.Pay.Modules.Compliance;
 using RockBreaker.Pay.Modules.Fraud;
 using RockBreaker.Pay.Modules.Wallet.Abstractions;
 using RockBreaker.Pay.Modules.Wallet.Application;
@@ -39,7 +40,8 @@ public sealed class WalletTransferOwnershipTests
             new TransferRequestValidator(),
             new AllowFraudEvaluator(),
             repository,
-            store);
+            store,
+            new VerifiedKycGuard());
 
         var result = await service.TransferForUserAsync(
             Guid.NewGuid(),
@@ -135,6 +137,15 @@ public sealed class WalletTransferOwnershipTests
     /// EN: Test double always returning Allow for fraud evaluation.
     /// Architecture: Hand-Written Stub.
     /// </summary>
+    private sealed class VerifiedKycGuard : IKycGuard
+    {
+        /// <inheritdoc />
+        public Task<bool> IsUserVerifiedAsync(Guid userId) => Task.FromResult(true);
+
+        /// <inheritdoc />
+        public Task<bool> IsWalletOwnerVerifiedAsync(Guid walletId) => Task.FromResult(true);
+    }
+
     private sealed class AllowFraudEvaluator : IFraudEvaluator
     {
         /// <inheritdoc />

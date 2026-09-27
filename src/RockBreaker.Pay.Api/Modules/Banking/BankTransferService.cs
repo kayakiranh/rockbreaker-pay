@@ -1,4 +1,5 @@
 using RockBreaker.Pay.Common;
+using RockBreaker.Pay.Modules.Compliance;
 using RockBreaker.Pay.Modules.Cutoff;
 using RockBreaker.Pay.Modules.Fraud;
 using RockBreaker.Pay.Modules.Wallet.Abstractions;
@@ -18,6 +19,7 @@ public sealed class BankTransferService : IBankTransferService
     private readonly IFraudEvaluator _fraudEvaluator;
     private readonly IBankingClient _bankingClient;
     private readonly IExternalWalletStore _walletStore;
+    private readonly IKycGuard _kycGuard;
 
     /// <summary>TR: Servis bağımlılıklarını alır. EN: Receives service dependencies. Architecture: Constructor Injection.</summary>
     public BankTransferService(
@@ -25,13 +27,15 @@ public sealed class BankTransferService : IBankTransferService
         ICutoffClient cutoffClient,
         IFraudEvaluator fraudEvaluator,
         IBankingClient bankingClient,
-        IExternalWalletStore walletStore)
+        IExternalWalletStore walletStore,
+        IKycGuard kycGuard)
     {
         _walletRepository = walletRepository;
         _cutoffClient = cutoffClient;
         _fraudEvaluator = fraudEvaluator;
         _bankingClient = bankingClient;
         _walletStore = walletStore;
+        _kycGuard = kycGuard;
     }
 
     /// <inheritdoc />
@@ -47,6 +51,9 @@ public sealed class BankTransferService : IBankTransferService
                 "IDEMPOTENCY_KEY_REQUIRED",
                 "Idempotency-Key header is required.");
         }
+
+        if (!await _kycGuard.IsUserVerifiedAsync(userId))
+            return OperationResult<BankTransferResponse>.Fail("KYC_REQUIRED", "Verified KYC is required for bank transfers.");
 
         var wallet = await _walletRepository.GetByUserIdAsync(userId);
         if (wallet is null)
@@ -91,6 +98,9 @@ public sealed class BankTransferService : IBankTransferService
                 "IDEMPOTENCY_KEY_REQUIRED",
                 "Idempotency-Key header is required.");
         }
+
+        if (!await _kycGuard.IsUserVerifiedAsync(userId))
+            return OperationResult<BankTransferResponse>.Fail("KYC_REQUIRED", "Verified KYC is required for bank transfers.");
 
         var wallet = await _walletRepository.GetByUserIdAsync(userId);
         if (wallet is null)

@@ -74,4 +74,20 @@ public sealed class UserRepository : IUserRepository
         using var connection = _connectionFactory.CreateConnection();
         await connection.ExecuteAsync(sql, new { UserId = userId, PasswordHash = passwordHash });
     }
+
+    /// <inheritdoc />
+    public async Task UpdateKycStatusAsync(Guid userId, string kycStatus)
+    {
+        const string sql = """
+            UPDATE dbo.Users
+            SET KycStatus = @KycStatus,
+                UpdatedAtUtc = SYSUTCDATETIME()
+            WHERE Id = @UserId;
+            """;
+
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.ExecuteAsync(
+            sql,
+            new { UserId = userId, KycStatus = kycStatus });
+    }
 }

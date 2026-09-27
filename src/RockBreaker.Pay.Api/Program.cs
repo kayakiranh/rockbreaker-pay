@@ -6,6 +6,7 @@ using RockBreaker.Pay.Infrastructure.Auditing;
 using RockBreaker.Pay.Infrastructure.Persistence;
 using RockBreaker.Pay.Infrastructure.Health;
 using RockBreaker.Pay.Modules.Cutoff;
+using RockBreaker.Pay.Modules.Compliance;
 using RockBreaker.Pay.Modules.Campaigns;
 using RockBreaker.Pay.Modules.Banking;
 using RockBreaker.Pay.Modules.Fraud;
@@ -72,6 +73,8 @@ builder.Services.AddScoped<IPasswordHasher, Pbkdf2PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IProfileMapper, ProfileMapper>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<IKycGuard, KycGuard>();
+builder.Services.AddScoped<IKycService, KycService>();
 
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<IWalletTransferStore, WalletTransferStore>();

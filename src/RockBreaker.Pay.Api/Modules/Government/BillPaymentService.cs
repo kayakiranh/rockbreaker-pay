@@ -1,4 +1,5 @@
 using RockBreaker.Pay.Common;
+using RockBreaker.Pay.Modules.Compliance;
 using RockBreaker.Pay.Modules.Fraud;
 using RockBreaker.Pay.Modules.Wallet.Abstractions;
 using RockBreaker.Pay.Modules.Wallet.Domain;
@@ -16,6 +17,7 @@ public sealed class BillPaymentService : IBillPaymentService
     private readonly IWalletRepository _walletRepository;
     private readonly IFraudEvaluator _fraudEvaluator;
     private readonly IBillPaymentStore _paymentStore;
+    private readonly IKycGuard _kycGuard;
 
     /// <summary>
     /// TR: Servis bağımlılıklarını alır.
@@ -26,12 +28,14 @@ public sealed class BillPaymentService : IBillPaymentService
         IGovernmentSoapClient governmentClient,
         IWalletRepository walletRepository,
         IFraudEvaluator fraudEvaluator,
-        IBillPaymentStore paymentStore)
+        IBillPaymentStore paymentStore,
+        IKycGuard kycGuard)
     {
         _governmentClient = governmentClient;
         _walletRepository = walletRepository;
         _fraudEvaluator = fraudEvaluator;
         _paymentStore = paymentStore;
+        _kycGuard = kycGuard;
     }
 
     /// <inheritdoc />
@@ -52,6 +56,13 @@ public sealed class BillPaymentService : IBillPaymentService
             return OperationResult<BillPaymentResponse>.Fail(
                 "IDEMPOTENCY_KEY_REQUIRED",
                 "Idempotency-Key header is required.");
+        }
+
+        if (!await _kycGuard.IsUserVerifiedAsync(userId))
+        {
+            return OperationResult<BillPaymentResponse>.Fail(
+                "KYC_REQUIRED",
+                "Verified KYC is required for bill payments.");
         }
 
         var wallet = await _walletRepository.GetByUserIdAsync(userId);

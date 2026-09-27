@@ -1,5 +1,6 @@
 using FluentValidation;
 using RockBreaker.Pay.Common;
+using RockBreaker.Pay.Modules.Compliance;
 using RockBreaker.Pay.Modules.Fraud;
 using RockBreaker.Pay.Modules.Wallet.Abstractions;
 using RockBreaker.Pay.Modules.Wallet.Contracts;
@@ -18,6 +19,7 @@ public sealed class WalletTransferService : IWalletTransferService
     private readonly IFraudEvaluator _fraudEvaluator;
     private readonly IWalletRepository _walletRepository;
     private readonly IWalletTransferStore _transferStore;
+    private readonly IKycGuard _kycGuard;
 
     /// <summary>
     /// TR: Transfer servisinin bağımlılıklarını alır.
@@ -32,12 +34,14 @@ public sealed class WalletTransferService : IWalletTransferService
         IValidator<TransferRequest> validator,
         IFraudEvaluator fraudEvaluator,
         IWalletRepository walletRepository,
-        IWalletTransferStore transferStore)
+        IWalletTransferStore transferStore,
+        IKycGuard kycGuard)
     {
         _validator = validator;
         _fraudEvaluator = fraudEvaluator;
         _walletRepository = walletRepository;
         _transferStore = transferStore;
+        _kycGuard = kycGuard;
     }
 
     /// <inheritdoc />
@@ -84,6 +88,13 @@ public sealed class WalletTransferService : IWalletTransferService
             return OperationResult<TransferResponse>.Fail(
                 "IDEMPOTENCY_KEY_REQUIRED",
                 "Idempotency-Key header is required.");
+        }
+
+        if (!await _kycGuard.IsWalletOwnerVerifiedAsync(request.SourceWalletId))
+        {
+            return OperationResult<TransferResponse>.Fail(
+                "KYC_REQUIRED",
+                "Source wallet owner must have Verified KYC status.");
         }
 
         var fraud = await _fraudEvaluator.EvaluateAsync(request.SourceWalletId, request.Amount);
