@@ -7,11 +7,12 @@ namespace RockBreaker.Pay.Modules.Campaigns;
 /// </summary>
 public interface ICampaignClient
 {
-    /// <summary>
-    /// TR: Dış kampanya servisindeki aktif kampanyaları getirir.
-/// EN: Retrieves active campaigns from the external campaign service.
-/// Architecture: External Query Port.
-    /// </summary>
-    /// <returns>TR: Kampanya listesi. EN: Campaign list.</returns>
+    /// <summary>TR: Aktif kampanyaları getirir. EN: Retrieves active campaigns. Architecture: External Query Port.</summary>
     Task<IReadOnlyCollection<CampaignResponse>> GetCampaignsAsync();
+
+    /// <summary>TR: Kullanıcıyı kampanyaya dahil eder. EN: Enrolls the user in a campaign. Architecture: External Command Port.</summary>
+    Task<bool> JoinAsync(Guid campaignId, Guid userId);
+
+    /// <summary>TR: Kullanıcının kampanyaya katılımını sorgular. EN: Checks whether the user participates in a campaign. Architecture: External Query Port.</summary>
+    Task<bool> IsJoinedAsync(Guid campaignId, Guid userId);
 }

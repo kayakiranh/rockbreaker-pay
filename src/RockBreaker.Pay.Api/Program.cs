@@ -96,6 +96,7 @@ builder.Services.AddScoped<IOutboxNotificationProcessor, OutboxNotificationProce
 builder.Services.AddHostedService<OutboxNotificationWorker>();
 builder.Services.AddScoped<IFraudEvaluator, DatabaseFraudEvaluator>();
 builder.Services.AddScoped<IFraudRuleService, FraudRuleService>();
+builder.Services.AddScoped<ICampaignService, CampaignService>();
 builder.Services.AddScoped<IValidator<TransferRequest>, TransferRequestValidator>();
 builder.Services.AddScoped<IAuditLogWriter, AuditLogWriter>();
 builder.Services.AddScoped<IRegulatoryReportService, RegulatoryReportService>();
